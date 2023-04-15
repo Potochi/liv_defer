@@ -48,10 +48,9 @@
 
 /* This macro sets up the defer stack. Should be used at the beginning of a
  * function definition */
-#define LIV_DEFER_START_MARK(stack_size)                      \
-	static const int N_LIV_DEFER_STACK_SIZE = stack_size; \
-	void *N_LIV_DEFER_STACK[N_LIV_DEFER_STACK_SIZE];      \
-	N_LIV_DEFER_STACK[0] = &&N_LIV_DEFER_RETURN;          \
+#define LIV_DEFER_START_MARK(stack_size)                                      \
+	static const int N_LIV_DEFER_STACK_SIZE = stack_size;                 \
+	void *N_LIV_DEFER_STACK[stack_size] = { [0] = &&N_LIV_DEFER_RETURN }; \
 	volatile int N_LIV_DEFER_COUNTER = 1
 
 /* Defer the execution of some code. *name* should be unique in the local
