@@ -43,6 +43,9 @@
 #define N_LIV_DEFER_STACK_HANDLER _liv_defer_stack_handler
 #endif
 
+#define LIV_ABORT_MSG_FMT \
+	"%s:%d:1: Defer stack size exceeded. Consider increasing it's size.\n"
+
 /* This macro sets up the defer stack. Should be used at the beginning of a
  * function definition */
 #define LIV_DEFER_START_MARK(stack_size)                      \
@@ -53,20 +56,18 @@
 
 /* Defer the execution of some code. *name* should be unique in the local
  * scope */
-#define LIV_DEFER(name, body)                                          \
-	do {                                                           \
-		N_LIV_DEFER_STACK[N_LIV_DEFER_COUNTER++] =             \
-			&&LIV_CONCAT(N_LIV_DEFER_LABEL, name);         \
-		if (N_LIV_DEFER_COUNTER > N_LIV_DEFER_STACK_SIZE) {    \
-			LIV_DEFER_ABORT_FUNCTION(                      \
-				"%s:%d:1: Defer stack size exceeded. " \
-				"Consider increasing it's size.\n",    \
-				__FILE__, __LINE__);                   \
-		}                                                      \
-		break;                                                 \
-		LIV_CONCAT(N_LIV_DEFER_LABEL, name)                    \
-			: body;                                        \
-		goto N_LIV_DEFER_STACK_HANDLER;                        \
+#define LIV_DEFER(name, body)                                                 \
+	do {                                                                  \
+		N_LIV_DEFER_STACK[N_LIV_DEFER_COUNTER++] =                    \
+			&&LIV_CONCAT(N_LIV_DEFER_LABEL, name);                \
+		if (N_LIV_DEFER_COUNTER > N_LIV_DEFER_STACK_SIZE) {           \
+			LIV_DEFER_ABORT_FUNCTION(LIV_ABORT_MSG_FMT, __FILE__, \
+						 __LINE__);                   \
+		}                                                             \
+		break;                                                        \
+		LIV_CONCAT(N_LIV_DEFER_LABEL, name)                           \
+			: body;                                               \
+		goto N_LIV_DEFER_STACK_HANDLER;                               \
 	} while (0)
 
 /* Execute the deferred code and return a value */
